@@ -3,6 +3,7 @@ import helmet from "helmet";
 import cors from "cors";
 import usersRoutes from "./routes/users.routes.js";
 import eventRoutes from "./routes/event.routes.js";
+import motorcycleRoutes from "./routes/motorcycle.routes.js";
 import cookieParser from "cookie-parser";
 export const app = express();
 const allowedOrigins = [
@@ -30,3 +31,4 @@ app.get("/listen", (_req, res) => {
 });
 app.use("/users", usersRoutes);
 app.use("/events", eventRoutes);
+app.use("/motorcycles", motorcycleRoutes);
