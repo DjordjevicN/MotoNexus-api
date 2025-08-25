@@ -36,6 +36,14 @@ export const getMotorcycleById = async (req: Request, res: Response) => {
   res.json(motorcycle);
 };
 
+export const getMotorcyclesByOwner = async (req: Request, res: Response) => {
+  const { ownerId } = req.params;
+  console.log(ownerId);
+
+  const motorcycles = await Motorcycle.find({ owner: ownerId });
+  res.json(motorcycles);
+};
+
 const addRange = (filter: any, field: string, min?: number, max?: number) => {
   if (min != null || max != null) {
     filter[field] = {

@@ -3,6 +3,7 @@ import {
   createEvent,
   deleteEvent,
   getEventById,
+  getEventsByOwner,
   listEvents,
   updateEvent,
 } from "../controllers/eventController.js";
@@ -16,6 +17,7 @@ r.post("/", validate(EventCreateSchema, ["body"]), asyncH(createEvent));
 
 r.get("/", asyncH(listEvents));
 r.get("/:id", asyncH(getEventById));
+r.get("/owner/:ownerId", asyncH(getEventsByOwner));
 r.patch("/:id", asyncH(updateEvent));
 r.delete("/:id", asyncH(deleteEvent));
 export default r;
