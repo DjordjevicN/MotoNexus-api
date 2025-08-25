@@ -14,10 +14,8 @@ export const getUsers = async (req: Request, res: Response) => {
   const page = parseInt(req.query.page as string) || 1;
   const limit = parseInt(req.query.limit as string) || 10;
   const skip = (page - 1) * limit;
-
   const users = await User.find().skip(skip).limit(limit).lean();
   const totalUsers = await User.countDocuments();
-
   res.json({
     data: users,
     page,
@@ -39,10 +37,8 @@ export const loginUser = async (req: Request, res: Response) => {
   const { email, password } = req.body;
   const user = await User.findOne({ email }).exec();
   if (!user) return res.status(401).json({ message: "Invalid credentials" });
-
   const isMatch = await bcrypt.compare(password, user.password as string);
   if (!isMatch) return res.status(401).json({ message: "Invalid credentials" });
-
   const token = signToken({ id: user._id });
   res.cookie("token", token, {
     httpOnly: true,
@@ -50,7 +46,6 @@ export const loginUser = async (req: Request, res: Response) => {
     sameSite: "lax",
     maxAge: 1000 * 60 * 60,
   });
-
   res.json({ message: "Login successful", user });
 };
 

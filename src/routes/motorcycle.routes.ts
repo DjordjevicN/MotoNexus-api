@@ -4,6 +4,7 @@ import {
   createMotorcycle,
   deleteMotorcycle,
   getMotorcycleById,
+  getMotorcyclesByOwner,
   listMotorcycles,
   updateMotorcycle,
 } from "../controllers/motorcycle.controller.js";
@@ -18,5 +19,6 @@ r.post("/", asyncH(createMotorcycle));
 r.patch("/:id", asyncH(updateMotorcycle));
 r.delete("/:id", asyncH(deleteMotorcycle));
 r.get("/:id", asyncH(getMotorcycleById));
+r.get("/owner/:ownerId", asyncH(getMotorcyclesByOwner));
 
 export default r;

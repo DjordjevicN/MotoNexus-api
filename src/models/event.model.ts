@@ -10,7 +10,7 @@ const EventSchema = new Schema(
     }, // creator
     title: { type: String, required: true },
     startDate: { type: Date, required: true },
-    endDate: { type: Date, required: true },
+    endDate: { type: Date },
     location: {
       name: String,
       lat: Number,

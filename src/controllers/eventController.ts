@@ -12,48 +12,64 @@ export const updateEvent = async (req: Request, res: Response) => {
   res.json(eventData);
 };
 
+function escapeRegExp(s: string) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 export async function listEvents(req: Request, res: Response) {
   const {
     country,
-    code,
     city,
     rideType,
     owner,
-    from,
-    to,
-    page = 1,
-    limit = 20,
+    startDate,
+    endDate,
+    page = "1",
+    limit = "20",
     sort,
     order,
-  } = req.query as any;
+  } = req.query as Record<string, string | undefined>;
 
   const filter: any = {};
-  if (code) filter.countryCode = String(code).toUpperCase(); //
-  if (country) filter.country = new RegExp(`^${country}$`, "i");
-  if (city) filter.city = new RegExp(`^${city}$`, "i");
+
+  if (country) filter.country = country.toUpperCase();
+  if (city && city !== "All Cities")
+    filter.city = new RegExp(`^${escapeRegExp(city)}$`, "i");
   if (rideType) filter.rideType = rideType;
   if (owner) filter.owner = owner;
-  if (from || to) {
-    filter.startDate = {
-      ...(from ? { $gte: new Date(from) } : {}),
-      ...(to ? { $lte: new Date(to) } : {}),
-    };
+
+  if (startDate && endDate) {
+    filter.$and = [
+      { startDate: { $lte: new Date(endDate) } },
+      { endDate: { $gte: new Date(startDate) } },
+    ];
+  } else if (startDate) {
+    filter.startDate = { $gte: new Date(startDate) };
+  } else if (endDate) {
+    filter.endDate = { $lte: new Date(endDate) };
   }
 
-  const skip = (Number(page) - 1) * Number(limit);
-  const sortSpec = { [sort]: order === "desc" ? -1 : 1 };
+  const pageNum = Math.max(1, Number(page) || 1);
+  const limitNum = Math.min(100, Math.max(1, Number(limit) || 20));
+  const skip = (pageNum - 1) * limitNum;
+
+  const sortField = sort && sort.length ? sort : "startDate";
+  const sortDir = order === "desc" ? -1 : 1;
 
   const [data, total] = await Promise.all([
-    Event.find(filter).sort(sortSpec).skip(skip).limit(Number(limit)).lean(),
+    Event.find(filter)
+      .sort({ [sortField]: sortDir })
+      .skip(skip)
+      .limit(limitNum)
+      .lean(),
     Event.countDocuments(filter),
   ]);
 
   res.json({
     data,
-    page: Number(page),
-    limit: Number(limit),
+    page: pageNum,
+    limit: limitNum,
     total,
-    hasMore: Number(page) * Number(limit) < total,
+    hasMore: pageNum * limitNum < total,
   });
 }
 
@@ -68,4 +84,9 @@ export const getEventById = async (req: Request, res: Response) => {
   const event = await Event.findById(id);
   if (!event) return res.sendStatus(404);
   res.json(event);
+};
+export const getEventsByOwner = async (req: Request, res: Response) => {
+  const { ownerId } = req.params;
+  const events = await Event.find({ owner: ownerId });
+  res.json(events);
 };
